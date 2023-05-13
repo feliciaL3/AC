@@ -1,0 +1,649 @@
+section .data
+prompt db 0Ah
+db "Choose a process:",0Ah
+;ex 9
+db "0. Process 0 - Inverting a string",0Ah
+;ex 5
+db "1. Process 1 - Converting a string to uppercase",0Ah
+;ex 2 math
+db "2. Process 2 - Subtraction of two numbers",0Ah
+;ex 10 math
+db "3. Process 3 - Checking whether a number is odd or even",0Ah
+;ex 16 math
+db "4. Process 4 - Determining the smallest number between two numbers",0Ah
+;ex 6
+db "5. Process 5 - Converting a string to lowercase",0Ah
+;ex 3 math
+db "6. Process 6 - Multiplication of two numbers",0Ah
+;ex  11 math
+db "7. Process 7 - Checking whether a number is prime or not",0Ah
+;ex 15 math
+db "8. Process 8 - Determining the largest number between 2 numbers", 0Ah
+;ex 9 math
+db "9. Process 9 - Randomizer",0Ah
+db "e. Process 10 - Exit",0Ah
+db "> "
+
+prompt_len equ $ - prompt
+invalid db "Invalid input. Try again.",0Ah
+text db "Hello, I'm Felicia", 0
+length: equ $ - text
+buffer times 255 db 0
+string db "vreau acasa",10,0
+leng equ $ - string
+stringg db "VREAU ACASA",10,0
+len equ $ - string
+
+prime_msg db "prime", 0
+not_prime_msg db "not prime", 0
+pr8 db "Enter a number: ", 0
+    
+    
+even_msg db "even", 0
+odd_msg db "odd", 0
+msg db "Enter a number: ", 0
+
+newLine db 0Ah
+newL equ $ - newLine
+
+msg1 db "Enter number 1: ", 0
+len1 equ $ - msg1
+msg2 db "Enter number 2: ", 0
+len2 equ $ - msg2
+msg3 db "The result is: ", 0
+len3 equ $ - msg3
+msg4: db "Enter the first number: ", 0
+len4 equ $ - msg4
+msg5: db "Enter the second number: ", 0
+len5 equ $ - msg5
+msg6 db "The smallest digit is: ", 0
+len6 equ $- msg6
+msg9 db "The largest digit is: ", 0
+len9 equ $- msg9
+
+msgg db "Enter a number: ", 0
+newLL equ $ - newLine
+msgg1 db "Enter number 1: ", 0
+lenn1 equ $ - msgg1
+msgg2 db "Enter number 2: ", 0
+lenn2 equ $ - msgg2
+msgg3 db "The result is: ", 0
+lenn3 equ $ - msgg3
+msgg4: db "Enter the first number: ", 0
+lenn4 equ $ - msgg4
+msgg5: db "Enter the second number: ", 0
+lenn5 equ $ - msgg5
+msgg6 db "The smallest digit is: ", 0
+lenn6 equ $- msgg6
+
+;for process 10
+    line db '9 5 2 10 16 6 3 11 15 9', 0Ah
+    lenght equ $-line
+
+section .bss
+num resb 2
+choice resb 1
+num1 resb 2
+num2 resb 2
+res resb 1 ; reserve 1 byte for the result
+smallest: resb 2
+
+numm resb 2
+choicee resb 1
+numm1 resb 2
+numm2 resb 2
+
+
+largest: resb 2
+    
+section .text
+global _start
+
+_start:
+jmp menu
+menu:
+; Print the prompt for menu selection
+mov eax, 4
+mov ebx, 1
+mov ecx, prompt
+mov edx, prompt_len
+int 80h
+; Get user input for process selection
+mov eax, 3
+mov ebx, 0
+mov ecx, choice
+mov edx, 1
+int 80h
+; Check if input is valid
+cmp byte [choice], '0'
+jl invalid_input
+cmp byte [choice], '9'
+jg invalid_input
+; Subtract '0' to convert from ASCII to integer
+sub byte [choice], '0'
+; Jump to the appropriate process
+cmp byte [choice], 0
+je process_0
+cmp byte [choice], 1
+je process_1
+cmp byte [choice], 2
+je process_2
+cmp byte [choice], 3
+je process_3
+cmp byte [choice], 4
+je process_4
+cmp byte [choice], 5
+je process_5
+cmp byte [choice], 6
+je process_6
+cmp byte [choice], 7
+je process_7
+cmp byte [choice], 8
+je process_8
+cmp byte [choice], 9
+je process_9
+cmp byte [choice], 10
+je process_10
+invalid_input:
+; Print an error message and return to menu
+mov eax, 4
+mov ebx, 1
+mov ecx, invalid
+mov edx, 25
+int 80h
+jmp menu
+print_newline:
+mov eax, 4
+mov ebx, 1
+mov ecx, newLine
+mov edx, newL
+int 80h
+ret
+
+
+
+process_0:
+call print_newline
+; Print the prompt
+mov eax, 4
+mov ebx, 1
+mov ecx, text
+mov edx, length
+int 80h
+call print_newline
+; Reverse the string in place
+mov eax, 0 ; index i = 0
+mov ecx, length ; index j = length
+dec ecx ; decrement j to skip the null terminator
+reverse_loop:
+cmp eax, ecx ; compare i and j
+jge print_inverted ; if i >= j, we're done
+mov dl, [text+eax] ; save text[i] in dl
+xchg dl, [text+ecx] ; swap text[i] and text[j]
+mov [text+eax], dl
+inc eax ; increment i
+dec ecx ; decrement j
+jmp reverse_loop
+print_inverted:
+; Print the inverted string
+mov eax, 4
+mov ebx, 1
+mov ecx, text
+mov edx, length
+int 80h
+jmp menu
+
+
+
+process_1:
+call print_newline
+call print
+call print_newline
+mov ecx, string
+call toUpper
+call print
+int 80h
+jmp menu
+toUpper:
+mov al, [ecx] ; ecx is the pointer, so [ecx] the current char
+cmp al, 0
+je done
+cmp al, 'a'
+jb next_please
+cmp al, 'z'
+ja next_please
+sub al, 20h ; move AL upper case and
+mov [ecx], al ; write it back to string
+next_please:
+inc ecx ; not al, that's the character. ecx has to
+; be increased, to point to next char
+jmp toUpper
+done: ret
+print:
+mov ecx, string ; what to print
+mov edx, len ; length of string to be printed
+mov ebx, 1
+mov eax, 4
+int 80h
+ret
+
+
+process_2:
+; print new line
+call print_newline
+; prompt user to enter number 1
+mov eax, 4 ; sys_write
+mov ebx, 1 ; stdout
+mov ecx, msg1
+mov edx, len1
+int 80h
+; read number 1 from user input
+mov eax, 3 ; sys_read
+mov ebx, 0 ; stdin
+mov ecx, num1
+mov edx, 2 ; read 2 bytes
+int 80h
+call print_newline
+; prompt user to enter number 2
+mov eax, 4 ; sys_write
+mov ebx, 1 ; stdout
+mov ecx, msg2
+mov edx, len2
+int 80h
+; read number 2 from user input
+mov eax, 3 ; sys_read
+mov ebx, 0 ; stdin
+mov ecx, num2
+mov edx, 2 ; read 2 bytes
+int 80h
+; convert num1 and num2 from ASCII to integer values
+mov al, [num1]
+sub al, '0'
+mov bl, [num2]
+sub bl, '0'
+; add num1 and num2 together
+sub al, bl
+; convert the result back to ASCII
+add al, '0'
+; store the result in the res variable
+mov [res], al
+call print_newline
+; print the result
+mov eax, 4 ; sys_write
+mov ebx, 1 ; stdout
+mov ecx, res ; use res variable to print the result
+mov edx, 1 ; print 1 byte
+int 80h
+jmp menu
+
+
+process_3:
+call print_newline
+; Prompt for a number
+mov eax, 4
+mov ebx, 1
+mov ecx, msg
+mov edx, 15
+int 80h
+; Read input from user
+mov eax, 3
+mov ebx, 0
+mov ecx, num
+mov edx, 2
+int 80h
+; Convert input to integer
+xor eax, eax
+mov al, byte [num]
+sub eax, '0'
+; Check if number is even or odd
+test al, 1
+jz even
+call print_newline
+; Print "odd"
+mov eax, 4
+mov ebx, 1
+mov ecx, odd_msg
+mov edx, 3
+int 80h
+jmp menu
+even:
+; Print "even"
+call print_newline
+mov eax, 4
+mov ebx, 1
+mov ecx, even_msg
+mov edx, 4
+int 80h
+jmp menu
+
+
+
+process_4:
+call print_newline
+; prompt user to enter number 1
+mov eax, 4 ; sys_write
+mov ebx, 1 ; stdout
+mov ecx, msg4
+mov edx, len4
+int 80h
+; read number 1 from user input
+mov eax, 3 ; sys_read
+mov ebx, 0 ; stdin
+mov ecx, num1
+mov edx, 2 ; read 2 bytes
+int 80h
+call print_newline
+; prompt user to enter number 2
+mov eax, 4 ; sys_write
+mov ebx, 1 ; stdout
+mov ecx, msg5
+mov edx, len5
+int 80h
+; read number 2 from user input
+mov eax, 3 ; sys_read
+mov ebx, 0 ; stdin
+mov ecx, num2
+mov edx, 2 ; read 2 bytes
+int 80h
+call print_newline
+; convert num1 and num2 from ASCII to integer values
+mov al, [num1]
+sub al, '0'
+mov bl, [num2]
+sub bl, '0'
+; compare num1 and num2 to find the smallest number
+cmp al, bl
+jle num1_smallest
+mov ecx, [num2]
+jmp _print_res
+num1_smallest:
+mov ecx, [num1]
+_print_res:
+mov [smallest], ecx
+mov ecx,msg6
+mov edx, len6
+mov ebx,1 ;file descriptor (stdout)
+mov eax,4 ;system call number (sys_write)
+int 0x80 ;call kernel
+mov ecx, smallest
+mov edx, 2
+mov ebx,1 ;file descriptor (stdout)
+mov eax,4 ;system call number (sys_write)
+int 0x80 ;call kernel
+jmp menu
+
+
+process_5:
+    call print_newline
+    call priint
+    call print_newline
+    mov ecx, stringg
+    call toLower
+    call priint
+    int 80h
+    jmp menu
+toLower:
+    mov al, [ecx]       ; ecx is the pointer, so [ecx] the current char
+    cmp al, 0
+    je doone
+    cmp al, 'A'
+    jb neext_please
+    cmp al, 'Z'
+    ja neext_please
+    add al, 20h         ; move AL lower case and
+    mov [ecx], al       ; write it back to string
+neext_please:
+    inc ecx             ; not al, that's the character. ecx has to
+                        ; be increased, to point to next char
+    jmp toLower
+doone:   ret
+priint:
+    mov ecx, stringg    ; what to print
+    mov edx, len       ; length of string to be printed
+    mov ebx, 1
+    mov eax, 4
+    int 80h
+    ret
+
+
+
+
+process_6:
+    ; print new line
+    call print_newline
+    ; prompt user to enter number 1
+    mov eax, 4          ; sys_write
+    mov ebx, 1          ; stdout
+    mov ecx, msg1
+    mov edx, len1
+    int 80h
+    ; read number 1 from user input
+    mov eax, 3          ; sys_read
+    mov ebx, 0          ; stdin
+    mov ecx, num1
+    mov edx, 2          ; read 2 bytes
+    int 80h
+    call print_newline
+    ; prompt user to enter number 2
+    mov eax, 4          ; sys_write
+    mov ebx, 1          ; stdout
+    mov ecx, msg2
+    mov edx, len2
+    int 80h
+    ; read number 2 from user input
+    mov eax, 3          ; sys_read
+    mov ebx, 0          ; stdin
+    mov ecx, num2
+    mov edx, 2          ; read 2 bytes
+    int 80h
+    ; convert num1 and num2 from ASCII to integer values
+    mov al, [num1]
+    sub al, '0'
+    mov bl, [num2]
+    sub bl, '0'
+    ; multiply num1 and num2 together
+    mul bl
+    ; convert the result back to ASCII
+    add ax, '0'
+    
+    ; store the result in the res variable
+    mov [res], al
+    call print_newline
+    ; print the result
+    mov eax, 4          ; sys_write
+    mov ebx, 1          ; stdout
+    mov ecx, res        ; use res variable to print the result
+    mov edx, 1          ; print 1 byte
+    int 80h
+    
+    jmp menu
+
+
+
+
+process_7:
+call print_newline
+; Prompt for a number
+mov eax, 4
+mov ebx, 1
+mov ecx, pr8
+mov edx, 15
+int 80h
+; Read input from user
+mov eax, 3
+mov ebx, 0
+mov ecx, numm
+mov edx, 2
+int 80h
+; Convert input to integer
+xor eax, eax
+mov al, byte [numm]
+sub eax, '0'
+; Check if number is prime
+mov ebx, 2          ; divisor
+mov edx, 0          ; remainder
+cmp eax, ebx        ; compare with 2
+jbe prime           ; if n <= 2, it's a prime number
+mov ecx, eax        ; counter = n
+shr ecx, 1          ; ecx = n/2
+div_loop:
+mov eax, ecx        ; eax = counter
+xor edx, edx        ; clear remainder
+div ebx             ; divide counter by divisor
+test edx, edx       ; check remainder
+jz not_prime        ; if remainder is 0, n is not a prime number
+dec ecx             ; decrement counter
+jnz div_loop        ; loop until counter reaches 0
+prime:
+call print_newline
+; Print "prime"
+mov eax, 4
+mov ebx, 1
+mov ecx, prime_msg
+mov edx, 5
+int 80h
+jmp menu
+not_prime:
+; Print "not prime"
+call print_newline
+mov eax, 4
+mov ebx, 1
+mov ecx, not_prime_msg
+mov edx, 9
+int 80h
+jmp menu
+
+
+process_8:
+    ; print new line
+    call print_newline
+    ; prompt user to enter number 1
+    mov eax, 4          ; sys_write
+    mov ebx, 1          ; stdout
+    mov ecx, msg4
+    mov edx, len4
+    int 80h
+    ; read number 1 from user input
+    mov eax, 3          ; sys_read
+    mov ebx, 0          ; stdin
+    mov ecx, num1
+    mov edx, 2          ; read 2 bytes
+    int 80h
+    call print_newline
+    ; prompt user to enter number 2
+    mov eax, 4          ; sys_write
+    mov ebx, 1          ; stdout
+    mov ecx, msg5
+    mov edx, len5
+    int 80h
+    ; read number 2 from user input
+    mov eax, 3          ; sys_read
+    mov ebx, 0          ; stdin
+    mov ecx, num2
+    mov edx, 2          ; read 2 bytes
+    int 80h
+    call print_newline
+    ; convert num1 and num2 from ASCII to integer values
+    mov al, [num1]
+    sub al, '0'
+    mov bl, [num2]
+    sub bl, '0'
+    ; compare num1 and num2 to find the largest number
+    cmp al, bl
+    jge num1_largest
+    mov ecx, [num2]
+    jmp _print_ress
+num1_largest:
+    mov ecx, [num1]
+_print_ress:
+    mov   [largest], ecx
+    mov   ecx,msg9
+    mov   edx, len9
+    mov   ebx,1    ;file descriptor (stdout)
+    mov   eax,4    ;system call number (sys_write)
+    int   0x80    ;call kernel
+    mov   ecx, largest
+    mov   edx, 2
+    mov   ebx,1    ;file descriptor (stdout)
+    mov   eax,4    ;system call number (sys_write)
+    int   0x80    ;call kernel
+    jmp menu
+
+
+
+process_9:
+
+;section .data
+ ;   numbers db 10, 0       ; array to store 10 random numbers
+  ;  msg db 'Random numbers:', 0Ah  ; message to print
+   ; len equ $-msg
+;section .text
+ ;   global _start
+;_start:
+ ;   mov eax, 40h            ; get system time function code
+  ;  xor ecx, ecx            ; null segment
+   ; int 21h                 ; call DOS service
+    ;mov dx, cx              ; dx = low word of system time
+    ;mov cx, 10              ; repeat 10 times
+;generate:
+ ;   mov ah, 02h             ; random function code
+  ;  int 21h                 ; call DOS service
+   ; mov [numbers+ecx-1], al ; store random number in array
+    ;dec cx
+    ;jnz generate
+    ; print message
+    ;mov eax, 4              ; print function code
+;    mov ebx, 1              ; standard output
+ ;   mov ecx, msg            ; message address
+  ;  mov edx, len            ; message length
+   ; int 80h                 ; call Linux service
+
+    ; print numbers
+    ;mov ecx, 10             ; repeat 10 times
+    ;mov esi, numbers        ; array address
+;print:
+;    mov eax, 4              ; print function code
+ ;   mov ebx, 1              ; standard output
+  ;  mov dl, [esi]           ; number to print
+   ; add dl, '0'             ; convert to ASCII
+;    mov ecx, 1              ; character length
+ ;   int 80h                 ; call Linux service
+  ;  mov dl, ' '             ; separator
+   ; int 80h
+;    inc esi
+ ;   dec ecx
+  ;  jnz print
+    ; exit
+;    mov eax, 1              ; exit function code
+ ;   xor ebx, ebx            ; return code 0
+  ;  int 80h                 ; call Linux service
+  
+call print_newline
+    ; print line
+    mov eax, 4              ; print function code
+    mov ebx, 1              ; standard output
+    mov ecx, line           ; line address
+    mov edx, lenght           ; line length
+    int 80h                 ; call Linux service
+
+    ; exit
+    mov eax, 1              ; exit function code
+    xor ebx, ebx            ; return code 0
+    int 80h                 ; call Linux service
+
+
+
+
+
+
+process_10:
+jmp exit
+clear_input:
+; Clear the choice variable
+mov byte [choice], 0
+ret
+exit:
+; Exit the program
+mov eax, 1
+xor ebx, ebx
+int 80h
